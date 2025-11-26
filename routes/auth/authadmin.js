@@ -1,7 +1,10 @@
 const express = require("express");
 const Authentication = require("../../app/Controllers/Auth/AuthAdmin");
 const router = express.Router();
+const jwt = require("jsonwebtoken");
+const verifyToken = require("../middleware/verifyToken");
 
+// Register admin
 router.post("/register", async (req, res) => {
   try {
     const adminData = req.body;
@@ -20,6 +23,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
+// Login admin → mengembalikan JWT
 router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -50,6 +54,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
+// Logout → cukup di frontend hapus token
 router.post("/logout", (req, res) => {
   // JWT stateless → backend tidak perlu destroy session
   res.json({
@@ -58,6 +63,7 @@ router.post("/logout", (req, res) => {
   });
 });
 
+// Contoh route proteksi
 router.get("/profile", verifyToken, async (req, res) => {
   res.json({
     success: true,
