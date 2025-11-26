@@ -24,12 +24,18 @@ router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
     const { admin, token } = await Authentication.login(username, password);
+
     req.session.admin = admin;
-    res.json({
-      success: true,
-      message: "Admin logged in successfully",
-      data: { admin, token },
+
+    req.session.save((err) => {
+      if (err) throw err;
+      res.json({
+        success: true,
+        message: "Admin logged in successfully",
+        data: { admin, token },
+      });
     });
+
   } catch (error) {
     res.status(500).json({
       success: false,
