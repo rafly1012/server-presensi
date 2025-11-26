@@ -23,19 +23,24 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
-    const { admin, token } = await Authentication.login(username, password);
+    const admin = await Authentication.login(username, password);
 
-    req.session.admin = admin;
+    if (!admin) {
+      return res.status(401).json({ success: false, message: "Username atau password salah" });
+    }
 
-    req.session.save((err) => {
-      if (err) throw err;
-      res.json({
-        success: true,
-        message: "Admin logged in successfully",
-        data: { admin, token },
-      });
+    // Buat JWT
+    const token = jwt.sign(
+      { id: admin.id, username: admin.username },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.json({
+      success: true,
+      message: "Login berhasil",
+      data: { admin, token },
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -45,45 +50,19 @@ router.post("/login", async (req, res) => {
   }
 });
 
-router.post("/logout", async (req, res) => {
-  try {
-    req.session.destroy((err) => {
-      if (err) {
-        throw new Error("Logout failed");
-      }
-      res.status(200).json({
-        success: true,
-        message: "Logout successfully",
-      });
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to logout",
-      error: error.message,
-    });
-  }
+router.post("/logout", (req, res) => {
+  // JWT stateless → backend tidak perlu destroy session
+  res.json({
+    success: true,
+    message: "Logout berhasil, hapus token di frontend",
+  });
 });
 
-router.get("/session", async (req, res) => {
-  try {
-    if (req.session.admin) {
-      res.status(200).json({
-        success: true,
-        data: req.session.admin,
-      });
-    } else {
-      res.status(401).json({
-        success: false,
-        message: "No active session",
-      });
-    }
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
+router.get("/profile", verifyToken, async (req, res) => {
+  res.json({
+    success: true,
+    data: req.user, // data dari JWT
+  });
 });
 
 module.exports = router;
