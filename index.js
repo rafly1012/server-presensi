@@ -32,7 +32,11 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false },
+    cookie: {
+      secure: true,      // WAJIB karena HTTPS
+      httpOnly: true,    // Lebih aman
+      sameSite: "none",  // WAJIB untuk domain berbeda
+    },
   })
 );
 
