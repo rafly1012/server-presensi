@@ -21,7 +21,7 @@ const client = new twilio(accountSid, authToken);
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://presensi-guru-three.vercel.app/",
     credentials: true,
   })
 );
